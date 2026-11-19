@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Donasi Daffiyanet</title>
+        <script>
+            // Set tema sebelum render supaya tidak berkedip
+            (function () {
+                var t = null;
+                try {
+                    t = localStorage.getItem("tema");
+                } catch (e) {}
+                if (!t)
+                    t =
+                        window.matchMedia &&
+                        matchMedia("(prefers-color-scheme: light)").matches
+                            ? "light"
+                            : "dark";
+                document.documentElement.setAttribute("data-theme", t);
+            })();
+        </script>
+        <style>
+            :root,
+            [data-theme="dark"] {
+                --bg: #0a0d1a;
+                --card: #141a36;
+                --card2: #10152d;
+                --line: #232b52;
+                --text: #e6e9f5;
+                --muted: #9aa3c7;
+                --gold: #fcd34d;
+                --green: #22c55e;
+                --code-bg: #2a2614;
+                --badge-bg: #1b1a14;
+                --hover: #2f3970;
+                --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+                --glow: rgba(252, 211, 77, 0.35);
+            }
+            [data-theme="light"] {
+                --bg: #f4f6fd;
+                --card: #ffffff;
+                --card2: #f1f4fc;
+                --line: #dde3f5;
+                --text: #1a2040;
+                --muted: #5b6590;
+                --gold: #b45309;
+                --green: #16a34a;
+                --code-bg: #fef3c7;
+                --badge-bg: #fffbeb;
+                --hover: #cfd8f5;
+                --shadow: 0 10px 30px rgba(40, 60, 120, 0.12);
+                --glow: rgba(217, 119, 6, 0.3);
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                line-height: 1.5;
+                transition:
+                    background 0.4s ease,
+                    color 0.4s ease;
+                overflow-x: hidden;
+            }
+            .card,
+            .step,
+            .chip,
+            .badge,
+            code,
+            button,
+            .qr-box {
+                transition:
+                    background 0.4s ease,
+                    border-color 0.4s ease,
+                    color 0.4s ease,
+                    transform 0.25s ease,
+                    box-shadow 0.25s ease;
+            }
+
+            /* Latar bergerak halus */
+            .bg-blob {
+                position: fixed;
+                border-radius: 50%;
+                filter: blur(80px);
+                opacity: 0.25;
+                z-index: -1;
+                animation: melayang 14s ease-in-out infinite alternate;
+                pointer-events: none;
+            }
+            .bg-blob.a {
+                width: 320px;
+                height: 320px;
+                background: var(--gold);
+                top: -80px;
+                left: -80px;
+            }
+            .bg-blob.b {
+                width: 280px;
+                height: 280px;
+                background: #6366f1;
+                bottom: -60px;
+                right: -60px;
+                animation-delay: -6s;
+            }
+            [data-theme="light"] .bg-blob {
+                opacity: 0.18;
+            }
+            @keyframes melayang {
+                from {
+                    transform: translate(0, 0) scale(1);
+                }
+                to {
+                    transform: translate(40px, 30px) scale(1.15);
+                }
+            }
+
+            .wrap {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 28px 16px 48px;
+            }
+
+            /* Tombol tema */
+            #tema {
+                position: fixed;
+                top: 14px;
+                right: 14px;
+                z-index: 10;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                padding: 0;
+                font-size: 20px;
+                background: var(--card);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow);
+                display: grid;
+                place-items: center;
+                cursor: pointer;
+                color: var(--text);
+            }
+            #tema:hover {
+                transform: rotate(20deg) scale(1.08);
+                background: var(--card2);
+            }
+            #tema:active {
+                transform: scale(0.92);
+            }
+            #tema span {
+                display: block;
+                animation: putar 0.5s ease;
+            }
+            @keyframes putar {
+                from {
+                    transform: rotate(-180deg) scale(0);
+                    opacity: 0;
+                }
+                to {
+                    transform: none;
+                    opacity: 1;
+                }
+            }
+
+            header {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: var(--badge-bg);
+                color: var(--gold);
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                animation: turun 0.7s ease both;
+            }
+            .badge .heart {
+                display: inline-block;
+                animation: detak 1.4s ease-in-out infinite;
+            }
+            @keyframes detak {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                15% {
+                    transform: scale(1.3);
+                }
+                30% {
+                    transform: scale(1);
+                }
+                45% {
+                    transform: scale(1.2);
+                }
+            }
+            @keyframes turun {
+                from {
+                    opacity: 0;
+                    transform: translateY(-14px);
+                }
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+
+            h1 {
+                margin: 16px 0 8px;
+                font-size: clamp(28px, 6vw, 40px);
+                color: var(--gold);
+                line-height: 1.15;
+                animation: naik 0.7s 0.1s ease both;
+            }
+            .kopi {
+                display: inline-block;
+                position: relative;
+            }
+            .kopi::before,
+            .kopi::after {
+                content: "";
+                position: absolute;
+                top: -6px;
+                width: 3px;
+                height: 14px;
+                border-radius: 3px;
+                background: var(--muted);
+                opacity: 0;
+                animation: uap 2.4s ease-in-out infinite;
+            }
+            .kopi::before {
+                left: 30%;
+            }
+            .kopi::after {
+                left: 60%;
+                animation-delay: 1.2s;
+            }
+            @keyframes uap {
+                0% {
+                    opacity: 0;
+                    transform: translateY(6px) scaleY(0.6);
+                }
+                40% {
+                    opacity: 0.7;
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(-14px) scaleY(1.2);
+                }
+            }
+            header p {
+                margin: 0 auto;
+                max-width: 560px;
+                color: var(--muted);
+                font-size: 14px;
+                animation: naik 0.7s 0.2s ease both;
+            }
+            header strong {
+                color: var(--text);
+            }
+            @keyframes naik {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px);
+                }
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+
+            .grid {
+                display: grid;
+                gap: 16px;
+                grid-template-columns: 1fr;
+            }
+            @media (min-width: 760px) {
+                .grid {
+                    grid-template-columns: 5fr 6fr;
+                }
+            }
+            .card {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 18px;
+                padding: 20px;
+                box-shadow: var(--shadow);
+                animation: naik 0.7s ease both;
+            }
+            .qris {
+                animation-delay: 0.3s;
+                text-align: center;
+            }
+            .how {
+                animation-delay: 0.45s;
+            }
+            .card:hover {
+                transform: translateY(-3px);
+            }
+
+            .qris h2 {
+                margin: 0;
+                color: var(--gold);
+                font-size: 18px;
+                letter-spacing: 0.04em;
+            }
+            .qris .name {
+                font-weight: 700;
+                margin-top: 4px;
+            }
+            .qris .nmid {
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .qr-box {
+                margin: 14px auto;
+                max-width: 300px;
+                background: #fff;
+                border: 3px solid #dc2626;
+                border-radius: 14px;
+                padding: 10px;
+                position: relative;
+                overflow: hidden;
+                animation: denyut 2.8s ease-in-out infinite;
+            }
+            .qr-box:hover {
+                transform: scale(1.03);
+            }
+            .qr-box img {
+                width: 100%;
+                display: block;
+                border-radius: 6px;
+            }
+            /* garis pindai */
+            .qr-box::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(220, 38, 38, 0.85),
+                    transparent
+                );
+                top: 0;
+                animation: pindai 3s ease-in-out infinite;
+                pointer-events: none;
+            }
+            @keyframes pindai {
+                0% {
+                    top: 0;
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    top: calc(100% - 3px);
+                    opacity: 0;
+                }
+            }
+            @keyframes denyut {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 var(--glow);
+                }
+                50% {
+                    box-shadow: 0 0 0 14px transparent;
+                }
+            }
+
+            .dl {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin: 2px 0 14px;
+                padding: 10px 18px;
+                border-radius: 10px;
+                background: var(--gold);
+                color: #1a1405;
+                font-size: 14px;
+                font-weight: 700;
+                text-decoration: none;
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+            }
+            [data-theme="light"] .dl {
+                color: #fff;
+            }
+            .dl .panah {
+                display: inline-block;
+                animation: turunnaik 1.4s ease-in-out infinite;
+            }
+            @keyframes turunnaik {
+                0%,
+                100% {
+                    transform: translateY(-2px);
+                }
+                50% {
+                    transform: translateY(3px);
+                }
+            }
+            .dl:hover {
+                transform: translateY(-2px) scale(1.04);
+                box-shadow: 0 8px 20px var(--glow);
+            }
+            .dl:active {
+                transform: scale(0.96);
+            }
+
+            .apps {
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .apps b {
+                color: var(--green);
+            }
+
+            .how h2 {
+                margin: 0 0 12px;
+                font-size: 13px;
+                letter-spacing: 0.15em;
+                color: var(--muted);
+            }
+            .step {
+                display: flex;
+                gap: 12px;
+                background: var(--card2);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
+                animation: masuk 0.6s ease both;
+            }
+            .step:nth-of-type(1) {
+                animation-delay: 0.6s;
+            }
+            .step:nth-of-type(2) {
+                animation-delay: 0.72s;
+            }
+            .step:nth-of-type(3) {
+                animation-delay: 0.84s;
+            }
+            .step:nth-of-type(4) {
+                animation-delay: 0.96s;
+            }
+            @keyframes masuk {
+                from {
+                    opacity: 0;
+                    transform: translateX(24px);
+                }
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+            .step:hover {
+                transform: translateX(4px);
+                border-color: var(--gold);
+            }
+            .step .ic {
+                font-size: 22px;
+                line-height: 1.2;
+                transition: transform 0.3s ease;
+            }
+            .step:hover .ic {
+                transform: scale(1.25) rotate(-8deg);
+            }
+            .step h3 {
+                margin: 0 0 2px;
+                font-size: 15px;
+            }
+            .step p {
+                margin: 0;
+                font-size: 13px;
+                color: var(--muted);
+            }
+            .num {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin: 4px 0;
+            }
+            code {
+                background: var(--code-bg);
+                color: var(--gold);
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-size: 13px;
+            }
+
+            button,
+            .btn {
+                font: inherit;
+                cursor: pointer;
+                border: 0;
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: 700;
+                background: var(--line);
+                color: var(--text);
+            }
+            .num button:hover {
+                background: var(--hover);
+                transform: translateY(-1px);
+            }
+            .num button:active {
+                transform: scale(0.94);
+            }
+            .num button.ok {
+                background: var(--green);
+                color: #04230f;
+                animation: pop 0.35s ease;
+            }
+            @keyframes pop {
+                0% {
+                    transform: scale(0.85);
+                }
+                60% {
+                    transform: scale(1.12);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .wa {
+                display: inline-block;
+                margin-top: 8px;
+                padding: 10px 16px;
+                background: var(--green);
+                color: #04230f;
+                text-decoration: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 700;
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+                animation: getar 4s 2s ease-in-out infinite;
+            }
+            .wa:hover {
+                transform: translateY(-2px) scale(1.04);
+                box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+                animation: none;
+            }
+            .wa:active {
+                transform: scale(0.96);
+            }
+            @keyframes getar {
+                0%,
+                90%,
+                100% {
+                    transform: none;
+                }
+                92% {
+                    transform: rotate(-2deg);
+                }
+                94% {
+                    transform: rotate(2deg);
+                }
+                96% {
+                    transform: rotate(-2deg);
+                }
+                98% {
+                    transform: rotate(2deg);
+                }
+            }
+
+            .repos {
+                margin-top: 26px;
+                text-align: center;
+                animation: naik 0.7s 1.1s ease both;
+            }
+            .repos h4 {
+                margin: 0 0 10px;
+                font-size: 12px;
+                letter-spacing: 0.15em;
+                color: var(--muted);
+            }
+            .chip {
+                display: inline-block;
+                margin: 4px;
+                padding: 8px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--card2);
+                color: var(--text);
+                font-size: 13px;
+                text-decoration: none;
+            }
+            .chip:hover {
+                transform: translateY(-3px);
+                border-color: var(--gold);
+                color: var(--gold);
+                box-shadow: var(--shadow);
+            }
+
+            footer {
+                margin-top: 24px;
+                text-align: center;
+                font-size: 11px;
+                color: var(--muted);
+                animation: naik 0.7s 1.25s ease both;
+            }
+            footer a {
+                color: var(--gold);
+            }
+
+            /* Hormati pengguna yang mematikan animasi */
+            @media (prefers-reduced-motion: reduce) {
+                *,
+                *::before,
+                *::after {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="bg-blob a"></div>
+        <div class="bg-blob b"></div>
+
+        <button
+            type="button"
+            id="tema"
+            aria-label="Ganti mode terang/gelap"
+            title="Ganti mode"
+        >
+            <span id="ikon">🌙</span>
+        </button>
+
+        <div class="wrap">
+            <header>
+                <span class="badge"
+                    ><span class="heart">💛</span> DUKUNGAN &amp; DONASI</span
+                >
+                <h1>Traktir <span class="kopi">Kopi</span> untuk Daffiyanet</h1>
+                <p>
+                    Semua proyek Daffiyanet (billing RT/RW, hotspot login, tool
+                    teknisi) <strong>gratis</strong> dan open source. Donasi
+                    sepenuhnya <strong>sukarela</strong> — tidak mengikat, tidak
+                    ada fitur terkunci.
+                </p>
+            </header>
+
+            <div class="grid">
+                <section class="card qris">
+                    <h2>SCAN QRIS</h2>
+                    <div class="name">DAFFIYANET, Konter</div>
+                    <div class="nmid">NMID : ID1025401523762</div>
+                    <div class="qr-box">
+                        <!-- Taruh gambar QRIS kamu sebagai qris.png di folder yang sama -->
+                        <img src="qris.png" alt="QRIS Daffiyanet" />
+                    </div>
+                    <a class="dl" href="qris.png" download="QRIS-Daffiyanet.png"
+                        ><span class="panah">⬇️</span> Download QRIS</a
+                    >
+                    <div class="apps">
+                        Bisa di-scan dari semua aplikasi:
+                        <b>GoPay · OVO · DANA · ShopeePay · LinkAja</b><br />
+                        dan semua m-banking yang mendukung QRIS.
+                    </div>
+                </section>
+
+                <section class="card how">
+                    <h2>CARA DUKUNG</h2>
+
+                    <div class="step">
+                        <div class="ic">📱</div>
+                        <div>
+                            <h3>Scan QRIS (paling cepat)</h3>
+                            <p>
+                                Buka e-wallet / m-banking → <b>Scan</b> →
+                                arahkan ke QR → masukkan nominal → bayar.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="ic">💸</div>
+                        <div>
+                            <h3>Transfer</h3>
+                            <div class="num">
+                                <code id="nomor">08516163719</code>
+                                <button type="button" id="salin">Salin</button>
+                            </div>
+                            <p>
+                                a.n. <b>Daffiyanet</b> (e-wallet / rekening yang
+                                terhubung nomor tersebut)
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="ic">💬</div>
+                        <div>
+                            <h3>Konfirmasi / nanya-nanya</h3>
+                            <p>
+                                Kirim pesan setelah transfer (opsional) —
+                                sekalian request fitur atau report bug:
+                            </p>
+                            <a
+                                class="wa"
+                                target="_blank"
+                                rel="noopener"
+                                href="https://wa.me/628516163719?text=Halo%20Daffiyanet%2C%20saya%20sudah%20donasi."
+                            >
+                                💛 WhatsApp 08516163719</a
+                            >
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="ic">⭐</div>
+                        <div>
+                            <h3>Gratis tapi berarti</h3>
+                            <p>
+                                Tidak bisa donasi? Star ⭐ repo, share ke teman
+                                teknisi/operator RT-RW, atau laporkan bug — itu
+                                juga sangat membantu!
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="repos">
+                <h4>PROYEK OPEN SOURCE DAFFIYANET</h4>
+                <a class="chip" href="https://github.com/Indra725/billing-rtrw"
+                    >billing-rtrw</a
+                >
+                <a
+                    class="chip"
+                    href="https://github.com/Indra725/daffiyanet-login"
+                    >daffiyanet-login</a
+                >
+                <a
+                    class="chip"
+                    href="https://github.com/Indra725/topup-diamond-mlbb"
+                    >topup-diamond-mlbb</a
+                >
+                <a
+                    class="chip"
+                    href="https://github.com/Indra725/addwan-fiberhome-all-version"
+                    >addwan-fiberhome-all-version</a
+                >
+            </section>
+
+            <footer>
+                Daffiyanet · NMID ID1025401523762 · 08516163719 a.n.
+                Daffiyanet<br />
+                Donasi tidak mengubah status lisensi proyek (tetap gratis &amp;
+                open source).<br />
+                <a href="https://github.com/Indra725">github.com/Indra725</a>
+            </footer>
+        </div>
+
+        <script>
+            var root = document.documentElement;
+            var ikon = document.getElementById("ikon");
+
+            function tampilIkon() {
+                // Mode gelap -> tampilkan matahari (untuk pindah ke terang), dan sebaliknya
+                ikon.textContent =
+                    root.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+            }
+            tampilIkon();
+
+            document
+                .getElementById("tema")
+                .addEventListener("click", function () {
+                    var baru =
+                        root.getAttribute("data-theme") === "dark"
+                            ? "light"
+                            : "dark";
+                    root.setAttribute("data-theme", baru);
+                    try {
+                        localStorage.setItem("tema", baru);
+                    } catch (e) {}
+                    // Ulang animasi ikon
+                    ikon.style.animation = "none";
+                    void ikon.offsetWidth;
+                    ikon.style.animation = "";
+                    tampilIkon();
+                });
+
+            document
+                .getElementById("salin")
+                .addEventListener("click", function () {
+                    var btn = this,
+                        teks = document.getElementById("nomor").textContent;
+                    function ok() {
+                        btn.textContent = "Tersalin ✓";
+                        btn.classList.add("ok");
+                        setTimeout(function () {
+                            btn.textContent = "Salin";
+                            btn.classList.remove("ok");
+                        }, 1800);
+                    }
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(teks).then(ok);
+                    } else {
+                        var t = document.createElement("textarea");
+                        t.value = teks;
+                        document.body.appendChild(t);
+                        t.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(t);
+                        ok();
+                    }
+                });
+        </script>
+    </body>
+</html>
